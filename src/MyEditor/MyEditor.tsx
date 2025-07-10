@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { EditorState } from 'prosemirror-state'
+import { useEffect, useRef, useState } from "react";
+import { EditorState, Plugin } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { schema } from "./schema";
 import { history } from "prosemirror-history";
@@ -7,10 +7,12 @@ import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import { toggleBold } from "./commands/toggleBold";
 import { toggleItalic } from "./commands/toggleItalic";
+import { isMarkActive } from "./isMarkActive";
 
 export const MyEditor = () => {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView>(null);
+  const [isBoldActive, setIsBoldActive] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current) {
@@ -31,6 +33,18 @@ export const MyEditor = () => {
             toggleItalic(state, dispatch);
             return true;
           },
+        }),
+        new Plugin({
+          view: () => {
+            return {
+              update: (view) => {
+                const bold = view.state.schema.marks.bold;
+                
+                const active = isMarkActive(view.state, bold);
+                setIsBoldActive(active);
+              }
+            }
+          }
         })
       ]
     });
@@ -50,7 +64,7 @@ export const MyEditor = () => {
   return (
     <div className="editor-container">
       <div className="editor-toolbar">
-        <button type="button" id="bold" onClick={() => {
+        <button type="button" id="bold" className={isBoldActive ? 'active' : ''} onClick={() => {
           const view = viewRef.current;
           
           if (!view) return;

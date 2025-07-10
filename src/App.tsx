@@ -1,11 +1,15 @@
+import { useRef } from 'react';
 import './App.css'
-import { MyEditor } from './MyEditor'
+// import { MyEditor } from './MyEditor'
+import { GoodEditor } from './GoodEditor'
 
 function App() {
-
+  const editorRef = useRef(null);
   return (
     <div>
-      <MyEditor />
+      {/* <MyEditor /> */}
+
+      <GoodEditor ref={editorRef} value={'<p>Hello</p>'} />
     </div>
   )
 }
