@@ -5,6 +5,29 @@ import { EditorState, Plugin } from "prosemirror-state";
 import { Schema } from "prosemirror-model";
 import { EditorView } from "prosemirror-view";
 
+
+const EditorToolbar = () => {
+  const editor = useEditorState();
+
+  // or
+  // const bold = useBoldMark()
+  // bold.toggle()
+  // bold.isActive()
+  // bold.canIUse()
+  
+  return (
+    <div>
+      <button 
+        style={{
+          backgroundColor: editor.isMarkActive('bold') ? 'black' : 'white',
+        }}
+        disabled={!editor.canUse('bold')}
+        onClick={() => editor.toggleMark('bold')}
+      >Bold</button>
+    </div>
+  )
+}
+
 type GoodEditorProps = {
   value?: string;
 }
@@ -22,6 +45,7 @@ export const GoodEditor = ({ value }: GoodEditorProps) => {
 
   return (
     <div>
+      <EditorToolbar />
       <div ref={editorRef} />
     </div>
   );
