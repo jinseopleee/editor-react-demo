@@ -34,17 +34,4 @@ export const bold: Extension = {
       return true;
     }
   }
-  // plugins: [
-  //   new Plugin({
-  //     view: () => {
-  //       return {
-  //         update: (view) => {
-  //           const bold = view.state.schema.marks.bold;
-  //           const active = isMarkActive(view.state, bold);
-  //           console.log(active);
-  //         }
-  //       }
-  //     }
-  //   }),
-  // ]
 }

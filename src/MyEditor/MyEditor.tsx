@@ -26,34 +26,34 @@ export const MyEditor = () => {
         keymap(baseKeymap),
         keymap({
           'Mod-b': (state, dispatch) => {
+            console.log('????')
             toggleBold(state, dispatch);
             return true;
           },
-          'Mod-i': (state, dispatch) => {
-            toggleItalic(state, dispatch);
-            return true;
-          },
+          // 'Mod-i': (state, dispatch) => {
+          //   toggleItalic(state, dispatch);
+          //   return true;
+          // },
         }),
-        new Plugin({
-          view: () => {
-            return {
-              update: (view) => {
-                const bold = view.state.schema.marks.bold;
+        // new Plugin({
+        //   view: () => {
+        //     return {
+        //       update: (view) => {
+        //         const bold = view.state.schema.marks.bold;
                 
-                const active = isMarkActive(view.state, bold);
-                setIsBoldActive(active);
-              }
-            }
-          }
-        })
+        //         const active = isMarkActive(view.state, bold);
+        //         setIsBoldActive(active);
+        //       }
+        //     }
+        //   }
+        // })
       ]
     });
+    console.log('my editor plugin :: ', state.plugins);
 
     const view = new EditorView(editorRef.current, {
       state,
     });
-
-    viewRef.current = view;
 
     return () => {
       view.destroy();
