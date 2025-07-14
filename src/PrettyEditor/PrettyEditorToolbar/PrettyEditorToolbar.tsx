@@ -13,11 +13,14 @@ import { Prev } from "./Prev";
 import { File } from "./File";
 import { Image } from "./Image";
 import { Next } from "./Next";
+import { usePrettyEditorContext } from "../context";
 
 export const PrettyEditorToolbar = () => {
+  const { editor } = usePrettyEditorContext();
+
   return (
     <div style={{ display: 'flex', gap: '2px', padding: '2px 0' }}>
-      <Bold />
+      {editor.state.schema.marks.bold && <Bold />}
       <Italic />
       <Underline />
       <Strike />

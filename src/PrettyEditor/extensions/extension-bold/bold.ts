@@ -1,8 +1,8 @@
 import type { Extension } from "../../types";
-import { toggleBold } from "./toggleBold";
 import { keymap } from "prosemirror-keymap";
 import type { Editor } from "../../Editor";
 import { isMarkActive } from "../../utils/isMarkActive";
+import { createMarkerToggle } from "../../utils/createMarkerToggle";
 
 export const bold: Extension = {
   id: 'bold',
@@ -22,16 +22,14 @@ export const bold: Extension = {
   plugins: [
     keymap({
       'Mod-b': (state, dispatch) => {
-        toggleBold(state, dispatch);
+        createMarkerToggle(state.schema.marks.bold)(state, dispatch);
         return true;
       }
     })
   ],
   commands: {
     toggleBold: (editor) => {
-      const state = editor.state;
-      const dispatch = editor.view.dispatch;
-      toggleBold(state, dispatch);
+      createMarkerToggle(editor.state.schema.marks.bold)(editor.state, editor.view.dispatch);
       editor.view.focus();
     }
   },

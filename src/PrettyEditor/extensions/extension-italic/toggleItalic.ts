@@ -2,7 +2,6 @@ import { EditorState } from "prosemirror-state";
 import { Transaction } from "prosemirror-state";
 
 export const toggleItalic = (state: EditorState, dispatch: ((tr: Transaction) => void) | undefined) => {
-  
   const { from, to, empty } = state.selection;
   const italicMark = state.schema.marks.italic;
   const tr = state.tr;

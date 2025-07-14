@@ -1,8 +1,8 @@
 import type { Extension } from "../../types";
-import { toggleItalic } from "./toggleItalic";
 import { keymap } from "prosemirror-keymap";
 import type { Editor } from "../../Editor";
 import { isMarkActive } from "../../utils/isMarkActive";
+import { createMarkerToggle } from "../../utils/createMarkerToggle";
 
 export const italic: Extension = {
   id: 'italic',
@@ -21,16 +21,14 @@ export const italic: Extension = {
   plugins: [
     keymap({
       'Mod-i': (state, dispatch) => {
-        toggleItalic(state, dispatch);
+        createMarkerToggle(state.schema.marks.italic)(state, dispatch);
         return true;
       }
     })
   ],
   commands: {
     toggleItalic: (editor) => {
-      const state = editor.state;
-      const dispatch = editor.view.dispatch;
-      toggleItalic(state, dispatch);
+      createMarkerToggle(editor.state.schema.marks.italic)(editor.state, editor.view.dispatch);
       editor.view.focus();
     }
   },
