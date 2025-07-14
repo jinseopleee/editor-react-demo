@@ -1,17 +1,6 @@
-// import { useRef } from "react";
-// import type { Editor } from "./Editor";
-// import { usePrettyEditorContext } from "./context";
+
 import { deepEqual} from 'fast-equals';
 
-// const useSubscribe = <T>(options: { selector: (state: Editor) => T; equalityFn?: (a: T, b: T) => boolean; }) => {
-//   const { editor } = usePrettyEditorContext();
-//   const { selector, equalityFn = deepEqual } = options;
-//   const prevValueRef = useRef<T>(selector(editor));
-
-//   const getSnapshot = () => {
-//     const nextValue = selector();
-//   }
-// }
 import { useSyncExternalStore } from 'react';
 
 type Selector<TSnapshot, TValue> = (snapshot: TSnapshot) => TValue;

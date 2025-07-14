@@ -1,6 +1,6 @@
 import { usePrettyEditorContext } from "../context";
 import { italic } from "../extensions/extension-italic/italic";
-import { useEditorStateSelector } from "../useEditorStateSelector";
+import { useEditorStateSelector } from "../hooks/useEditorStateSelector";
 
 export const Italic = () => {
   const { editor } = usePrettyEditorContext();

@@ -1,6 +1,6 @@
 import { usePrettyEditorContext } from "../context";
 import { bold } from "../extensions/extension-bold/bold";
-import { useEditorStateSelector } from "../useEditorStateSelector";
+import { useEditorStateSelector } from "../hooks/useEditorStateSelector";
 
 export const Bold = () => {
   const { editor } = usePrettyEditorContext();
