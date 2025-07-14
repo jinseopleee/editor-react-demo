@@ -1,7 +1,7 @@
 import { useMemo, type PropsWithChildren } from "react";
 import { PrettyEditorContext } from "./context"
-import type { Extension } from "./extensions/types";
 import { Editor } from "./Editor";
+import type { Extension } from "./types";
 
 type PrettyEditorRootProps = PropsWithChildren<{
   extensions: Extension[];
