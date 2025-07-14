@@ -1,41 +1,44 @@
+// import { useRef } from "react";
+// import type { Editor } from "./Editor";
+// import { usePrettyEditorContext } from "./context";
+import { deepEqual} from 'fast-equals';
+
+// const useSubscribe = <T>(options: { selector: (state: Editor) => T; equalityFn?: (a: T, b: T) => boolean; }) => {
+//   const { editor } = usePrettyEditorContext();
+//   const { selector, equalityFn = deepEqual } = options;
+//   const prevValueRef = useRef<T>(selector(editor));
+
+//   const getSnapshot = () => {
+//     const nextValue = selector();
+//   }
+// }
 import { useSyncExternalStore } from 'react';
-import { Editor } from './Editor';
 
-export function useSubscribe<T>(
-  editor: Editor,
-  getSnapshot: (editor: Editor) => T,
-): T {
-  return useSyncExternalStore(
-    // subscribe
-    (callback) => {
-      if (!editor.view || !editor.view.dom) return () => {};
+type Selector<TSnapshot, TValue> = (snapshot: TSnapshot) => TValue;
+type EqualityFn<T> = (a: T, b: T) => boolean;
 
-      const handler = () => {
-        callback(); // snapshot이 바뀌었는지 확인 후 리렌더 유도
-        return false;
-      };
+type UseSubscribeParams<TSnapshot, TValue> = {
+  subscribe: (callback: () => void) => () => void;
+  getSnapshot: () => TSnapshot;
+  selector: Selector<TSnapshot, TValue>;
+  equalityFn?: EqualityFn<TValue>;
+};
 
-      const prev = editor.view.props.handleDOMEvents?.selectionchange;
+export function useSubscribe<TSnapshot, TValue>({
+  subscribe,
+  getSnapshot,
+  selector,
+  equalityFn = deepEqual,
+}: UseSubscribeParams<TSnapshot, TValue>): TValue {
+  const getSelectedSnapshot = () => {
+    let lastValue = selector(getSnapshot());
+    
+    const next = selector(getSnapshot());
+    if (!equalityFn(next, lastValue)) {
+      lastValue = next;
+    }
+    return lastValue;
+  };
 
-      editor.view.setProps({
-        ...editor.view.props,
-        handleDOMEvents: {
-          ...editor.view.props.handleDOMEvents,
-          selectionchange: handler,
-        },
-      });
-
-      return () => {
-        editor.view.setProps({
-          ...editor.view.props,
-          handleDOMEvents: {
-            ...editor.view.props.handleDOMEvents,
-            selectionchange: prev,
-          },
-        });
-      };
-    },
-    // getSnapshot
-    () => getSnapshot(editor),
-  );
+  return useSyncExternalStore(subscribe, getSelectedSnapshot);
 }

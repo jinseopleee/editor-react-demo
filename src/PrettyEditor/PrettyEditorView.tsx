@@ -14,5 +14,5 @@ export const PrettyEditorView = () => {
     }
   }, [editor])
 
-  return <div ref={editorRef} />
+  return <div ref={editorRef} className="editor-content" />
 }

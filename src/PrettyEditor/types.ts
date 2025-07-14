@@ -1,6 +1,6 @@
 import { type Command, Plugin } from "prosemirror-state";
 import { type MarkSpec, type NodeSpec } from "prosemirror-model";
-import type { EditorView } from "prosemirror-view";
+import type { Editor } from "./Editor";
 
 export type Extension = {
   id: string; // 고유 ID (ex: 'bold', 'image')
@@ -11,5 +11,7 @@ export type Extension = {
   plugins?: Plugin[];
   keymap?: Record<string, Command>;
 
-  commands?: Record<string, (view: EditorView) => void>;
+  commands?: Record<string, (editor: Editor) => void>;
+
+  active?: (editor: Editor) => boolean;
 };

@@ -1,9 +1,9 @@
 import { EditorState } from "prosemirror-state";
-import type { Extension } from "./extensions/types";
 import { Schema } from "prosemirror-model";
 import { EditorView } from "prosemirror-view";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
+import type { Extension } from "./types";
 
 interface EditorOptions {
   extensions: Extension[];
@@ -11,13 +11,16 @@ interface EditorOptions {
 
 export class Editor {
 
+  private listeners = new Set<() => void>();
+
   public extensions: Extension[];
 
   public schema: Schema;
 
+  private prevEditorState: EditorState | null = null;
   private editorState: EditorState;
 
-  private editorView!: EditorView;
+  private editorView: EditorView | null = null;
 
   constructor(options: EditorOptions) {
     this.extensions = options.extensions;
@@ -63,16 +66,42 @@ export class Editor {
   }
 
   public get view(): EditorView {
+    if (!this.editorView) {
+      throw new Error('EditorView is not mounted');
+    }
+
     return this.editorView;
   }
 
   public mount(element: HTMLElement) {
     this.editorView = new EditorView(element, {
       state: this.editorState,
+      dispatchTransaction: (tr) => {
+        const newState = this.view.state.apply(tr);
+        this.updateState(newState);
+        this.view.updateState(newState);
+      }
     }) 
   }
 
   public unmount() {
-    this.editorView.destroy();
+    this.view.destroy();
+  }
+
+  public subscribe = (cb: () => void) => {
+    this.listeners.add(cb);
+    return () => {
+      this.listeners.delete(cb);
+    }
+  }
+
+  public updateState = (state: EditorState) => {
+    this.prevEditorState = this.editorState;
+    this.editorState = state;
+    this.listeners.forEach((cb) => cb());
+  }
+
+  public get prevState(): EditorState | null {
+    return this.prevEditorState;
   }
 }

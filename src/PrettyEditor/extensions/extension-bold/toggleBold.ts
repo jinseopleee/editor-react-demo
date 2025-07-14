@@ -6,10 +6,6 @@ export const toggleBold = (state: EditorState, dispatch: ((tr: Transaction) => v
   const { from, to, empty } = state.selection;
   const boldMark = state.schema.marks.bold;
   const tr = state.tr;
-
-  console.log('from :: ', from);
-  console.log('to :: ', to);
-  console.log('empty :: ', empty);
   
   if (empty) {
     // 커서만 있는 경우
