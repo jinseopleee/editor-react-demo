@@ -4,10 +4,10 @@ import { useEditorStateSelector } from "../hooks/useEditorStateSelector";
 
 export const Italic = () => {
   const { editor } = usePrettyEditorContext();
-  const isItalicActive = useEditorStateSelector(editor, (editor) => italic.active?.(editor) ?? false);
+  const isItalicActive = useEditorStateSelector(editor, (editor) => italic.commands.isActive(editor));
 
   return (
-    <button onClick={() => italic.commands?.toggleItalic(editor)} style={{
+    <button onClick={() => italic.commands.toggle(editor)} style={{
       backgroundColor: isItalicActive ? 'orange' : 'yellow',
     }}>
       Italic

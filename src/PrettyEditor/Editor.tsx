@@ -3,17 +3,17 @@ import { Schema } from "prosemirror-model";
 import { EditorView } from "prosemirror-view";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
-import type { Extension } from "./types";
+import type { ExtensionBaseOptions } from "./extension-builder/types";
 
 interface EditorOptions {
-  extensions: Extension[];
+  extensions: ExtensionBaseOptions[];
 }
 
 export class Editor {
 
   private listeners = new Set<() => void>();
 
-  public extensions: Extension[];
+  public extensions: ExtensionBaseOptions[];
 
   public schema: Schema;
 
@@ -30,8 +30,8 @@ export class Editor {
   }
 
   private createSchema(): Schema {
-    const marks = this.extensions?.map((e) => e.marks || {}).reduce((acc, m) => ({ ...acc, ...m }), {});
-    const nodes = this.extensions?.map((e) => e.nodes || {}).reduce((acc, n) => ({ ...acc, ...n }), {});
+    const marks = this.extensions.map((e) => e.marks).reduce((acc, m) => ({ ...acc, ...m }), {});
+    const nodes = this.extensions.map((e) => e.nodes).reduce((acc, n) => ({ ...acc, ...n }), {});
     const schema = new Schema({
       nodes: {
         doc: { content: "block+" },
@@ -51,7 +51,7 @@ export class Editor {
   }
 
   private createEditorState(): EditorState {
-    const plugins = this.extensions?.flatMap((e) => e.plugins || []) ?? [];
+    const plugins = this.extensions.flatMap((e) => e.plugins || []) ?? [];
     return EditorState.create({
       schema: this.schema,
       plugins: [
