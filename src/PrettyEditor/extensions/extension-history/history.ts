@@ -25,9 +25,11 @@ export const history = R.pipe(
   setExtensionCommand({
     undo: (editor: Editor) => {
       undo(editor.state, editor.view.dispatch);
+      editor.view.focus();
     },
     redo: (editor: Editor) => {
       redo(editor.state, editor.view.dispatch);
+      editor.view.focus();
     },
     canUndo: (editor: Editor) => {
       return undoDepth(editor.state) > 0;
