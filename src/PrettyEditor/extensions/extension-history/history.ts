@@ -1,6 +1,6 @@
 import * as R from 'remeda';
 import { setExtensionBaseOptions } from "../../extension-builder/setExtensionBaseOptions";
-import { history as historyPlugin, undo, redo } from 'prosemirror-history';
+import { history as historyPlugin, undo, redo, undoDepth, redoDepth } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
 import { setExtensionCommand } from '../../extension-builder/setExtensionCommand';
 import type { Editor } from '../../Editor';
@@ -28,6 +28,12 @@ export const history = R.pipe(
     },
     redo: (editor: Editor) => {
       redo(editor.state, editor.view.dispatch);
+    },
+    canUndo: (editor: Editor) => {
+      return undoDepth(editor.state) > 0;
+    },
+    canRedo: (editor: Editor) => {
+      return redoDepth(editor.state) > 0;
     },
     canUse: (editor: Editor) => {
       return editor.existsPlugin('history');

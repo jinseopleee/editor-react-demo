@@ -19,6 +19,7 @@ export class Editor {
   public schema: Schema;
 
   private prevEditorState: EditorState | null = null;
+
   private editorState: EditorState;
 
   private editorView: EditorView | null = null;
@@ -28,7 +29,6 @@ export class Editor {
   constructor(options: EditorOptions) {
     this.extensions = options.extensions;
     this.schema = this.createSchema();
-
     this.pluginMap = this.registerPlugin();
     this.editorState = this.createEditorState();
   }
