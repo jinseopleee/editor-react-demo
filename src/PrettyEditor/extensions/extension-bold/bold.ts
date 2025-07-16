@@ -8,6 +8,7 @@ import { isMarkActive } from '../../utils/isMarkActive';
 
 export const bold = R.pipe(
   setExtensionBaseOptions({
+    name: 'bold',
     marks: {
       bold: {
         parseDOM: [
@@ -39,7 +40,7 @@ export const bold = R.pipe(
       return isMarkActive(editor.state, editor.state.schema.marks.bold);
     },
     canUse: (editor: Editor) => {
-      return editor.state.schema.marks.bold !== undefined;
+      return editor.existsPlugin('bold');
     }
   })
 );

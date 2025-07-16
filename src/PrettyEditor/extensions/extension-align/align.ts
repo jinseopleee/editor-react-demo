@@ -7,6 +7,7 @@ import { keymap } from 'prosemirror-keymap';
 
 export const align = R.pipe(
   setExtensionBaseOptions({
+    name: 'align',
     nodes: {
       paragraph: {
         content: 'text*',
@@ -48,6 +49,10 @@ export const align = R.pipe(
       const { $from } = editor.state.selection;
       const node = $from.node($from.depth);
       return node.type.name === 'paragraph' && node.attrs.align === align;
-    }
+    },
+    canUse: (editor: Editor) => {
+      const paragraphType = editor.schema.nodes.paragraph;
+      return !!paragraphType?.spec.attrs?.align;
+    } 
   })
 )

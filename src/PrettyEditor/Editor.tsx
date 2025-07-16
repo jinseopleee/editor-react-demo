@@ -4,6 +4,7 @@ import { EditorView } from "prosemirror-view";
 import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import type { ExtensionBaseOptions } from "./extension-builder/types";
+import type { Plugin } from "prosemirror-state";
 
 interface EditorOptions {
   extensions: ExtensionBaseOptions[];
@@ -22,10 +23,13 @@ export class Editor {
 
   private editorView: EditorView | null = null;
 
+  private pluginMap: Map<string, Plugin[]> = new Map();
+
   constructor(options: EditorOptions) {
     this.extensions = options.extensions;
     this.schema = this.createSchema();
 
+    this.pluginMap = this.registerPlugin();
     this.editorState = this.createEditorState();
   }
 
@@ -50,8 +54,15 @@ export class Editor {
     return schema;
   }
 
+  private registerPlugin() {
+    const plugins = new Map<string, Plugin[]>();
+    this.extensions.map(e => plugins.set(e.name, e.plugins ?? []))
+    return plugins;
+  }
+
   private createEditorState(): EditorState {
-    const plugins = this.extensions.flatMap((e) => e.plugins || []) ?? [];
+    const plugins = Array.from(this.pluginMap.values()).flatMap(e => e);
+
     return EditorState.create({
       schema: this.schema,
       plugins: [
@@ -71,6 +82,10 @@ export class Editor {
     }
 
     return this.editorView;
+  }
+
+  public get prevState(): EditorState | null {
+    return this.prevEditorState;
   }
 
   public mount(element: HTMLElement) {
@@ -101,7 +116,7 @@ export class Editor {
     this.listeners.forEach((cb) => cb());
   }
 
-  public get prevState(): EditorState | null {
-    return this.prevEditorState;
+  public existsPlugin(name: string): boolean {
+    return Boolean(this.pluginMap.get(name));
   }
 }

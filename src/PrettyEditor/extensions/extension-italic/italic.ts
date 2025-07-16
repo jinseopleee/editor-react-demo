@@ -8,6 +8,7 @@ import { isMarkActive } from '../../utils/isMarkActive';
 
 export const italic = R.pipe(
   setExtensionBaseOptions({
+    name: 'italic',
     marks: {
       italic: {
         parseDOM: [
@@ -38,7 +39,7 @@ export const italic = R.pipe(
       return isMarkActive(editor.state, editor.state.schema.marks.italic);
     },
     canUse: (editor: Editor) => {
-      return editor.state.schema.marks.italic !== undefined;
+      return editor.existsPlugin('italic');
     }
   })
 )

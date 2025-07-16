@@ -8,6 +8,7 @@ import { isMarkActive } from '../../utils/isMarkActive';
 
 export const underline = R.pipe(
   setExtensionBaseOptions({
+    name: 'underline',
     marks: {
       underline: {
         parseDOM: [
@@ -38,7 +39,7 @@ export const underline = R.pipe(
       return isMarkActive(editor.state, editor.state.schema.marks.underline);
     },
     canUse: (editor: Editor) => {
-      return editor.state.schema.marks.underline !== undefined;
+      return editor.existsPlugin('underline');
     }
   }),
 );

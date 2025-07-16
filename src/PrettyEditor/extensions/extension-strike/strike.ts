@@ -8,6 +8,7 @@ import { isMarkActive } from '../../utils/isMarkActive';
 
 export const strike = R.pipe(
   setExtensionBaseOptions({
+    name: 'strike',
     marks: {
       strikethrough: {
         parseDOM: [
@@ -38,7 +39,7 @@ export const strike = R.pipe(
       return isMarkActive(editor.state, editor.state.schema.marks.strikethrough);
     },
     canUse: (editor: Editor) => {
-      return editor.state.schema.marks.strikethrough !== undefined;
+      return editor.existsPlugin('strike');
     }
   })
 );
