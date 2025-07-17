@@ -10,8 +10,8 @@ export const align = R.pipe(
     name: 'align',
     nodes: {
       paragraph: {
-        content: 'text*',
-        group: 'block',
+        content: "inline*",
+        group: "block",
         attrs: {
           align: {
             default: 'left',

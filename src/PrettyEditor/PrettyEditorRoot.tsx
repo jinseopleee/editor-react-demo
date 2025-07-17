@@ -8,12 +8,13 @@ import { strike } from "./extensions/extension-strike/strike";
 import type { ExtensionBaseOptions } from "./extension-builder/types";
 import { align } from "./extensions/extension-align";
 import { history } from "./extensions/extension-history";
+import { list } from "./extensions/extension-list";
 
 type PrettyEditorRootProps = PropsWithChildren<{
   extensions?: ExtensionBaseOptions[];
 }>
 
-export const PrettyEditorRoot = ({ children, extensions = [bold, italic, underline, strike, align, history] }: PrettyEditorRootProps) => {
+export const PrettyEditorRoot = ({ children, extensions = [bold, italic, underline, strike,  history, list] }: PrettyEditorRootProps) => {
   const editor = useMemo(() => new Editor({ extensions }), [extensions]);
 
   return (

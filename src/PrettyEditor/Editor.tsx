@@ -5,6 +5,7 @@ import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import type { ExtensionBaseOptions } from "./extension-builder/types";
 import type { Plugin } from "prosemirror-state";
+import {schema as basicSchema} from "prosemirror-schema-basic"
 
 interface EditorOptions {
   extensions: ExtensionBaseOptions[];
@@ -36,16 +37,19 @@ export class Editor {
   private createSchema(): Schema {
     const marks = this.extensions.map((e) => e.marks).reduce((acc, m) => ({ ...acc, ...m }), {});
     const nodes = this.extensions.map((e) => e.nodes).reduce((acc, n) => ({ ...acc, ...n }), {});
+
     const schema = new Schema({
       nodes: {
         doc: { content: "block+" },
         paragraph: {
-          content: "text*",
+          content: "inline*",
           group: "block",
           parseDOM: [{ tag: 'p' }],
-          toDOM() { return ['p', { class: 'paragraph' }, 0] }
+          toDOM() { return ['p', 0] }
         },
-        text: {},
+        text: {
+          group: 'inline',
+        },
         ...nodes,
       },
       marks,
@@ -56,18 +60,26 @@ export class Editor {
 
   private registerPlugin() {
     const plugins = new Map<string, Plugin[]>();
-    this.extensions.map(e => plugins.set(e.name, e.plugins ?? []))
+    this.extensions.map(e => plugins.set(e.name, typeof e.plugins === 'function' ? e.plugins(this.schema) : e.plugins))
     return plugins;
   }
 
   private createEditorState(): EditorState {
     const plugins = Array.from(this.pluginMap.values()).flatMap(e => e);
+    console.log('baseKeymap :: ', baseKeymap);
+    console.log('plugins :: ', plugins);
+
+    console.log('11 :: ', this.pluginMap.get('list'));
+
+    console.log('22 :: ', [...(this.pluginMap.get('list') || []), keymap(baseKeymap)])
+
+    
 
     return EditorState.create({
       schema: this.schema,
       plugins: [
-        keymap(baseKeymap),
         ...plugins,
+        keymap(baseKeymap),
       ]
     })
   }
