@@ -5,7 +5,6 @@ import { keymap } from "prosemirror-keymap";
 import { baseKeymap } from "prosemirror-commands";
 import type { ExtensionBaseOptions } from "./extension-builder/types";
 import type { Plugin } from "prosemirror-state";
-import {schema as basicSchema} from "prosemirror-schema-basic"
 
 interface EditorOptions {
   extensions: ExtensionBaseOptions[];
@@ -66,14 +65,6 @@ export class Editor {
 
   private createEditorState(): EditorState {
     const plugins = Array.from(this.pluginMap.values()).flatMap(e => e);
-    console.log('baseKeymap :: ', baseKeymap);
-    console.log('plugins :: ', plugins);
-
-    console.log('11 :: ', this.pluginMap.get('list'));
-
-    console.log('22 :: ', [...(this.pluginMap.get('list') || []), keymap(baseKeymap)])
-
-    
 
     return EditorState.create({
       schema: this.schema,

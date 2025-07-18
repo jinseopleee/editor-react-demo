@@ -5,7 +5,6 @@ import type { Editor } from "../../Editor";
 import { setExtensionCommand } from "../../extension-builder/setExtensionCommand";
 import { buildInputRules } from "./buildInputRules";
 import { keymap } from "prosemirror-keymap";
-import { baseKeymap } from "prosemirror-commands";
 
 export const list = R.pipe(
   setExtensionBaseOptions({
@@ -27,38 +26,97 @@ export const list = R.pipe(
         'Mod-[': liftListItem(schema.nodes.list_item),
         'Mod-]': sinkListItem(schema.nodes.list_item),
       }),
-      keymap(baseKeymap)
     ],
   }),
   setExtensionCommand({
     toggleBulletList: (editor: Editor) => {
-      const { view, state } = editor;
-      const nodeType = state.schema.nodes.bullet_list;
-      if (!nodeType) return;
-  
-      console.log(state.selection.from, state.selection.to, state.selection.empty);
-      console.log('toggleBulletList');
-      const { from, to } = state.selection;
-    state.doc.nodesBetween(from, to, (node, pos) => {
-      console.log('selected node:', node.type.name, node.attrs);
-    });
-    console.log('paragraph group:', state.schema.nodes.paragraph.group);
+      // const { view, state } = editor;
+      // const { bullet_list } = state.schema.nodes;
+      // const parent = state.selection.$from.node(-2);
+      // const inBullet = parent?.type === bullet_list;
 
-      const result = wrapInList(nodeType)(state, view.dispatch);
-      console.log(result);
-      view.focus();
+      // if (inBullet) {
+      //   // 이미 bullet list → paragraph로 해제
+      //   liftListItem(state.schema.nodes.list_item)(state, view.dispatch);
+      // } else {
+      //   // bullet list 적용
+      //   wrapInList(bullet_list)(state, view.dispatch);
+      // }
+      // view.focus();
+      const { state, view } = editor;
+      const { bullet_list, ordered_list, list_item } = state.schema.nodes;
+      const { $from } = state.selection;
+
+      console.log('$from :: ', $from);
+
+      const parentList = $from.node(-2);
+      console.log('parentList :: ', parentList);
+      const inBullet = parentList?.type === bullet_list;
+      const inOrdered = parentList?.type === ordered_list;
+
+      console.log('inBullet :: ', inBullet);
+      console.log('inOrdered :: ', inOrdered);
+
+      if (inBullet) {
+        liftListItem(list_item)(state, view.dispatch);
+      } else if (inOrdered) {
+        const tr = state.tr;
+        const listPos = $from.before($from.depth - 1);
+        tr.setNodeMarkup(listPos, undefined, bullet_list);
+        view.dispatch(tr);
+      } else {
+        wrapInList(bullet_list)(state, view.dispatch);
+      }
     },
     toggleOrderedList: (editor: Editor) => {
-      const { view, state } = editor;
-      const nodeType = state.schema.nodes.ordered_list;
-      if (!nodeType) return;
-  
-      wrapInList(nodeType)(state, view.dispatch);
-      view.focus();
+      // const { state, view } = editor;
+      // const { ordered_list } = state.schema.nodes;
+      // console.log('state.selection :: ', state.selection);
+      // const { $from } = state.selection;
+      // console.log('$from :: ', $from);
+      // const parent = $from.node(-2);
+      // console.log('parent :: ', parent);
+      // const inOrdered = parent?.type === ordered_list;
+      // console.log('inOrdered :: ', inOrdered);
+
+      // if (inOrdered) {
+      //   liftListItem(state.schema.nodes.list_item)(state, view.dispatch);
+      // } else {
+      //   wrapInList(ordered_list)(state, view.dispatch);
+      // }
+      // view.focus();
+      const { state, view } = editor;
+      const { ordered_list, bullet_list, list_item } = state.schema.nodes;
+      const { $from, $to } = state.selection;
+      console.log('selection :: ', $from, $to);
+      const range = $from.blockRange($to);
+      
+      if (!range) return;
+
+      console.log('range parent :: ', range.parent);
+
+      const parent = range.parent;
+      const inOrdered = parent.type === ordered_list;
+      const inBullet = parent.type === bullet_list;
+
+      if (inOrdered) {
+        // 해제
+        liftListItem(list_item)(state, view.dispatch);
+      } else if (inBullet) {
+        // bullet → ordered
+        const listPos = range.start - 1;
+        const tr = state.tr.setNodeMarkup(listPos, ordered_list);
+        view.dispatch(tr);
+      } else {
+        wrapInList(ordered_list)(state, view.dispatch);
+      }
+
+      // view.focus();
     },
     isActive: (editor: Editor, listType: 'bullet' | 'ordered') => {
       const { $from } = editor.state.selection;
       const node = $from.node($from.depth);
+      // console.log('node :: ', node.type.name);
       return node.type.name === listType;
     },
     canUse: (editor: Editor) => {

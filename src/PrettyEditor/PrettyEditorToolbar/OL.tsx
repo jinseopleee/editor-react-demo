@@ -7,6 +7,12 @@ export const OL = () => {
   const isOLActive = useEditorStateSelector(editor, (editor) => list.commands.isActive(editor, 'ordered'));
 
   return (
-    <button onClick={() => list.commands.toggleOrderedList(editor)} style={{ backgroundColor: isOLActive ? 'orange' : 'yellow' }}>OL</button>
+    <button
+      onClick={() => list.commands.toggleOrderedList(editor)}
+      style={{ backgroundColor: isOLActive ? 'orange' : 'yellow' }}
+      disabled={!list.commands.canUse(editor)}
+    >
+      OL
+    </button>
   )
 }

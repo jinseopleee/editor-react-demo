@@ -7,6 +7,12 @@ export const UL = () => {
   const isULActive = useEditorStateSelector(editor, (editor) => list.commands.isActive(editor, 'bullet'));
 
   return (
-    <button onClick={() => list.commands.toggleBulletList(editor)} style={{ backgroundColor: isULActive ? 'orange' : 'yellow' }}>UL</button>
+    <button
+      onClick={() => list.commands.toggleBulletList(editor)}
+      style={{ backgroundColor: isULActive ? 'orange' : 'yellow' }}
+      disabled={!list.commands.canUse(editor)}
+    >
+      UL
+    </button>
   )
 }
