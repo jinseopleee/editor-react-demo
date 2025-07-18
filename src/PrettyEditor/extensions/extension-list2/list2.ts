@@ -4,7 +4,7 @@ import { bulletListNode, listItemNode, orderedListNode } from './nodes';
 import { setExtensionCommand } from '../../extension-builder/setExtensionCommand';
 import { buildInputRules } from './buildInputRules';
 import { keymap } from 'prosemirror-keymap';
-import { wrapInListCommand } from './commands';
+import { toggleListCommand } from './commands';
 
 export const list2 = R.pipe(
   setExtensionBaseOptions({
@@ -17,7 +17,11 @@ export const list2 = R.pipe(
     plugins: (schema) => [
       buildInputRules(schema),
       keymap({
-        'Shift-Ctrl-8': wrapInListCommand(schema.nodes.orderedList),
+        'Shift-Ctrl-8': toggleListCommand(schema.nodes.orderedList),
+        'Shift-Ctrl-9': toggleListCommand(schema.nodes.bulletList),
+        // 'Enter': splitListItem(schema.nodes.listItem),
+        // 'Mod-[': liftListItem(schema.nodes.listItem),
+        // 'Mod-]': sinkListItem(schema.nodes.listItem),
         // 'Enter': splitListItem()
       }),
     ]

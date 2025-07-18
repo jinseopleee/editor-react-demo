@@ -34,7 +34,6 @@ import { TextSelection, type Command } from "prosemirror-state";
  */
 export const wrapInListCommand = (listType: NodeType): Command => {
   return (state, dispatch) => {
-    console.log('what?')
     const { schema, selection } = state;
     const { from, to } = selection;
     const listItemType = schema.nodes.listItem;
@@ -65,6 +64,45 @@ export const wrapInListCommand = (listType: NodeType): Command => {
     tr.setSelection(TextSelection.near(resolvedPos));
     if (dispatch) dispatch(tr);
     return true;
+  };
+}
+
+export const toggleListCommand = (listType: NodeType): Command => {
+  return (state, dispatch) => {
+    const { schema } = state;
+    const listItemType = schema.nodes.listItem;
+
+    if (!listType || !listItemType) return false;
+
+    // 현재 커서가 어떤 리스트에 있는지 확인
+    const $from = state.selection.$from;
+    let depth = $from.depth;
+
+    while (depth > 0) {
+      const node = $from.node(depth);
+      if (node.type === schema.nodes.bulletList || node.type === schema.nodes.orderedList) {
+        const listPos = $from.before(depth);
+
+        if (node.type === listType) {
+          // 현재와 같은 리스트 → 해제
+          if (dispatch) {
+            const tr = state.tr.lift($from.blockRange()!, depth - 1);
+            dispatch(tr);
+          }
+        } else {
+          // 리스트 타입 변경
+          if (dispatch) {
+            const tr = state.tr.setNodeMarkup(listPos, listType);
+            dispatch(tr);
+          }
+        }
+        return true;
+      }
+      depth--;
+    }
+
+    // 리스트가 아님 → 새로 wrap
+    return wrapInListCommand(listType)(state, dispatch);
   };
 }
 
