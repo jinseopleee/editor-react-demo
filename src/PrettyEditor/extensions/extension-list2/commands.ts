@@ -36,6 +36,8 @@ export const wrapInListCommand = (listType: NodeType): Command => {
   return (state, dispatch) => {
     const { schema, selection } = state;
     const { from, to } = selection;
+    console.log('from :: ', from);
+    console.log('to :: ', to);
     const listItemType = schema.nodes.listItem;
 
     if (!listType || !listItemType) return false;
@@ -45,9 +47,8 @@ export const wrapInListCommand = (listType: NodeType): Command => {
 
     const tr = state.tr;
 
-    // 선택된 블록들을 리스트로 감싸기
     const items: Node[] = [];
-    state.doc.nodesBetween(from, to, (node) => {
+    state.doc.nodesBetween(range.start, range.end, (node) => {
       if (node.type === schema.nodes.paragraph) {
         const listItem = listItemType.create(null, node);
         items.push(listItem);
@@ -56,14 +57,69 @@ export const wrapInListCommand = (listType: NodeType): Command => {
 
     if (!items.length) return false;
 
-    const listNode = listType.create(null, Fragment.fromArray(items));
-    tr.replaceRangeWith(from, to, listNode);
+    const listNode = listType.create(null, items);
+    tr.replaceRangeWith(range.start, range.end, listNode);
+    
+    const insertPos = tr.mapping.map(range.start);
+    const before = tr.doc.resolve(insertPos).nodeBefore;
+    if (before && before.type === listType) {
+      tr.join(insertPos);
+    }
 
-    // 새로운 리스트로 커서 이동
-    const resolvedPos = tr.doc.resolve(from + 1);
-    tr.setSelection(TextSelection.near(resolvedPos));
+    /// ---------
+
+    // const newSelection = state.selection.map(tr.doc, tr.mapping);
+    // tr.setSelection(newSelection);
+    // const { from, to } = state.selection;
+
+    // const mappedFrom = tr.mapping.map(from, -1);
+    // const mappedTo = tr.mapping.map(to, -1);
+    // tr.setSelection(TextSelection.create(tr.doc, mappedFrom, mappedTo)).scrollIntoView();
+    const isRange = !selection.empty;
+
+    if (isRange) {
+      const mappedFrom = tr.mapping.map(selection.from, -1);
+      const mappedTo   = tr.mapping.map(selection.to,   +1);
+
+      tr.setSelection(TextSelection.create(tr.doc, mappedFrom, mappedTo)).scrollIntoView();
+    } else {
+      const offsetInsidePara = selection.$from.parentOffset; // selection.from - range.start;
+      let $list = tr.doc.resolve(insertPos);
+      if ($list.nodeAfter?.type !== schema.nodes.listItem) {
+        $list = tr.doc.resolve(insertPos + 1);
+      }
+      const newPos = $list.pos + 1 + 1 + offsetInsidePara;
+      tr.setSelection(TextSelection.create(tr.doc, newPos)).scrollIntoView();
+    }
+    /// ---------
+
     if (dispatch) dispatch(tr);
     return true;
+
+    // const resolvedPos = tr.doc.resolve(range.start);
+    // console.log('resolvedPos :: ', resolvedPos);
+    // if (dispatch) dispatch(tr);
+    // return true
+
+    // // 선택된 블록들을 리스트로 감싸기
+    // const items: Node[] = [];
+    // state.doc.nodesBetween(from, to, (node) => {
+    //   if (node.type === schema.nodes.paragraph) {
+    //     const listItem = listItemType.create(null, node);
+    //     items.push(listItem);
+    //   }
+    // });
+
+    // if (!items.length) return false;
+
+    // const listNode = listType.create(null, Fragment.fromArray(items));
+    // tr.replaceRangeWith(from, to, listNode);
+
+    // // 새로운 리스트로 커서 이동
+    // const resolvedPos = tr.doc.resolve(from + 1);
+    // tr.setSelection(TextSelection.near(resolvedPos));
+    // if (dispatch) dispatch(tr);
+    // return true;
   };
 }
 
@@ -78,20 +134,30 @@ export const toggleListCommand = (listType: NodeType): Command => {
     const $from = state.selection.$from;
     let depth = $from.depth;
 
+    // console.log("현재 커서가 어떤 리스트에 있는지? :: ", depth);
+
+    // for (let d = $from.depth; d >= 0; d--) {
+    //   console.log('d :: ', d);
+    //   console.log('node :: ', $from.node(d).type.name);
+    // }
+
     while (depth > 0) {
       const node = $from.node(depth);
       if (node.type === schema.nodes.bulletList || node.type === schema.nodes.orderedList) {
         const listPos = $from.before(depth);
+        console.log('listPos :: ', listPos);
 
         if (node.type === listType) {
           // 현재와 같은 리스트 → 해제
           if (dispatch) {
+            console.log('현재와 같은 리스트 → 해제')
             const tr = state.tr.lift($from.blockRange()!, depth - 1);
             dispatch(tr);
           }
         } else {
           // 리스트 타입 변경
           if (dispatch) {
+            console.log('리스트 타입 변경')
             const tr = state.tr.setNodeMarkup(listPos, listType);
             dispatch(tr);
           }
@@ -100,6 +166,8 @@ export const toggleListCommand = (listType: NodeType): Command => {
       }
       depth--;
     }
+
+    console.log('리스트가 아님!')
 
     // 리스트가 아님 → 새로 wrap
     return wrapInListCommand(listType)(state, dispatch);
